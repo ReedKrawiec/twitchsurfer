@@ -68,7 +68,7 @@ class TwitchClient(RESTClient):
                 print("Access token recieved!")
                 return
 
-    # Extension of HTTPServer that has support for a callback function
+    # Extension of ThreadingHTTPServer that has support for a callback function
     class OAuthServer(ThreadingHTTPServer):
         callback = None
         def __init__(self, address, callback, handler_class=None):

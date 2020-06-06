@@ -3,6 +3,8 @@ import datetime
 import pytz
 import pdb
 import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.cluster import KMeans
 
 # the datetime library uses the local time so conversion to UTC is needed
 LOCAL_TIMEZONE = "America/New_York"
@@ -85,9 +87,15 @@ def generate_streamer_schedule(streamer, twitch_client):
     utc_today = local_today.astimezone(pytz.utc)
     utc_week_start = utc_today - datetime.timedelta(weeks=1)
 
+    FINAL_DATA = []
+
+    # Begin collecting VOD data
     # How many weeks of VOD data to collect
-    WEEK_DEPTH = 10
+    WEEK_DEPTH = 3
+    TOTAL_VODS = 0
     for _ in range(WEEK_DEPTH):
+        # TODO: support pagination
+        # NOTE: This implementation WILL break without pagination support when processing vods over many weeks
         vods = get_vods(utc_week_start, utc_today, streamer_id)
 
         # Iterate through all of the vods within the local week and generate a schedule
@@ -96,20 +104,41 @@ def generate_streamer_schedule(streamer, twitch_client):
 
         for vod in vods[0]:
             status_index_start = vod['start_time'] - utc_week_start
-            status_index_end = vod['end_time'] - utc_week_start
+            #status_index_end = vod['end_time'] - utc_week_start
 
             status_index_start = int(status_index_start.total_seconds() / 1800)
-            status_index_end = int(status_index_end.total_seconds() / 1800)
+            #status_index_end = int(status_index_end.total_seconds() / 1800)
 
-            for x in range(status_index_start, status_index_end):
-                STREAM_STATUS[x] = 1
+            STREAM_STATUS[status_index_start] = 1
+            #for x in range(status_index_start, status_index_end):
+            #    STREAM_STATUS[x] = 1
 
+
+        # Keep track of the vods per week to come up with the number of clustering groups
+        # TODO: probably better to use the median instead of the mean
+        TOTAL_VODS += len(vods)
+
+        # Plot the vod schedule of a streamer every week
         plt.plot(STREAM_STATUS)
+        FINAL_DATA.append(STREAM_STATUS)
 
+        # Update these variables per week
         utc_today = utc_week_start
         utc_week_start = utc_week_start - datetime.timedelta(weeks=1)
-    
+
     plt.show()
+
+    
+    # (SCRAPED) Begin k-means/medians
+    # Kernel Density Estimation fits the problem the best
+    # https://scikit-learn.org/stable/modules/density.html
+
+    # Flatten FINAL_DATA array
+    x_arr = []
+    for week in FINAL_DATA:
+        for vod_time in range(week):
+            x_arr.append([vod_time, 1])
+    X = 
 
 def get_user_id(display_name):
     res = twitch_client.make_request("/helix/users?login=" + display_name).json()
