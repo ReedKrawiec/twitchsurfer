@@ -86,7 +86,8 @@ def get_top_games(limit):
 
 #returns the results of every query added together
 def game_data_collection(game_limit,streamer_limit):
-  top_games_id = [x['id'] for x in get_top_games(game_limit)]
+  #Gets a list of the ids of the top games, limits by game_limit
+  top_games_id = [game_data['id'] for game_data in get_top_games(game_limit)]
   data = []
   for game_id in top_games_id:
     query_string = query_string_builder({"game_id":game_id,"first":streamer_limit})
@@ -95,7 +96,18 @@ def game_data_collection(game_limit,streamer_limit):
     data = data + result
   return data
 
-def record_data(user_data):
+def cached_game_name(game_id):
+  cache_subset = cache_data['game_ids']
+  #Searches the cache for a game name that corresponds
+  #to the provided game_id
+  for game_name in cache_subset.keys():
+    stored_game_id = cache_subset[game_name]
+    if stored_game_id == game_id:
+      return game_name
+  return -1
+
+def parse_data(user_data):
+  cache_subset = cache_data['user_ids']
   try:
     data = read_json("data.json")
   except:
@@ -103,41 +115,64 @@ def record_data(user_data):
   #Basically ensures that the game and user entry exists
   #And increments the viewer count
   for user in user_data:
+    user_id = user['user_id']
     game_id = user['game_id']
+    game_name = cached_game_name(game_id)
     user_name = user['user_name']
+    cache_subset[user_id]= user_name
     #Game has not been recorded before
-    if game_id not in data.keys():
-      data[game_id] = {}
+    if game_name not in data.keys():
+      data[game_name] = {}
     #User has not been recorded before
-    if user_name not in data[game_id].keys():
-      data[game_id][user_name] = user['viewer_count']
+    if user_name not in data[game_name].keys():
+      data[game_name][user_name] = user['viewer_count']
     else:
-      data[game_id][user_name] += user['viewer_count']
-  write_json("data.json",data)  
-  
+      data[game_name][user_name] += user['viewer_count']
+  cache_data['user_ids'] = cache_subset
+  return data
+
+
+
 GAME_LIMIT = 20
-STREAMER_LIMIT = 10
+#Limit for now is 100 streamers
+STREAMER_LIMIT = 50
+#How many streamers to display in the display mode
+TOP_STREAMER_CUTOFF = 10
 
 twitch_client = TwitchClient("gp762nuuoqcoxypju8c569th9wz7q5", "None", access_token="bgq3aphetc1h1e67jqi91jna9p1ots", refresh_token="io0mtmgwd1mb251gn96lietxx2fafqiq0hgcjlbo3thrrsva8g")
 twitch_client.login()
 
 if(len(sys.argv) > 1 and sys.argv[1] == "display"):
-  cache_subset = cache_data['game_ids']
-  #Inverts the cache for game ids, as they were stored under "game_name:game_id"
-  #Changes the format to "game_id:game_name"
-  #Enables us to look up game name by id
-  game_id_table = {}
-  for game in cache_subset.keys():
-    game_id_table[cache_subset[game]] = game
+  
   try:
     data = read_json("data.json")
   except:
-    print("Data file does not exist.")
-  for game_id in data:
-    print(game_id_table[game_id])
-    for user in data[game_id]:
-      print("\t" + user + " " + str(data[game_id][user]))
+    print("Data file does not exist, run the script without any arguments to collect / update viewer data.")
+    exit()
+  for game_name in data:
+    top_streamers = []
+    #Initialize a list of tuples, that will store the top streamers
+    for _ in range(0,TOP_STREAMER_CUTOFF):
+      top_streamers.append({"user_name":"NULL","viewer_count":-1})
+    #Game data contains viewership data for each streamer
+    #under a specific game id
+    game_viewers_data = data[game_name]
+    #Process each streamers's viewship data within the current game
+    for user_name in game_viewers_data:
+      viewer_count = game_viewers_data[user_name]
+      for index,streamer in enumerate(top_streamers):
+        saved_viewer_count = streamer["viewer_count"]
+        if viewer_count > saved_viewer_count:
+          #replaces 
+          top_streamers = top_streamers[:index] + [{"user_name":user_name,"viewer_count":viewer_count}] + top_streamers[index:len(top_streamers)-1]
+          break
+
+    print(game_name)
+    for streamer in top_streamers:
+      print("\t" + streamer["user_name"] + " " + str(streamer["viewer_count"]))
 else:
   #Records the top STREAMER_LIMIT streamers for the top GAME_LIMIT games
   #Intended to be run over a long period of time, every 30 minutes or so
-  record_data(game_data_collection(GAME_LIMIT,STREAMER_LIMIT))
+  raw_viewers_data = game_data_collection(GAME_LIMIT,STREAMER_LIMIT)
+  parsed = parse_data(raw_viewers_data)
+  write_json("data.json",parsed)
