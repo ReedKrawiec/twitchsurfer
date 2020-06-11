@@ -78,6 +78,7 @@ def get_vods(start_date, end_date, streamer, pagination_cursor=None):
 
 
 
+
 def generate_streamer_schedule(streamer, twitch_client):
     # Generates a weekly schedule that'll hopefully represent each streamers schedule
     # follow the 3 sd rule when detecting anomalies
@@ -94,7 +95,7 @@ def generate_streamer_schedule(streamer, twitch_client):
 
     # Begin collecting VOD data
     # How many weeks of VOD data to collect
-    WEEK_DEPTH = 3
+    WEEK_DEPTH = 10
     TOTAL_VODS = 0
     for _ in range(WEEK_DEPTH):
         # TODO: support pagination
@@ -111,6 +112,10 @@ def generate_streamer_schedule(streamer, twitch_client):
 
             status_index_start = int(status_index_start.total_seconds() / 1800)
             #status_index_end = int(status_index_end.total_seconds() / 1800)
+            if status_index_start >= 336:
+                print("MADE A POOSIE WOOSPIE")
+                pdb.set_trace()
+
 
             FINAL_DATA.append(status_index_start)
             STREAM_STATUS[status_index_start] = 1
@@ -149,7 +154,7 @@ def generate_streamer_schedule(streamer, twitch_client):
     # (remember that 1 unit = 30 minutes)
     # ie. rn, if a user streams on Monday at 11:00 and 12:00, each stream counts towards being part of the schedule
     # however, at 12:30 it does not
-    arr_to_kde(FINAL_DATA, debug=True, bandwidth=2)
+    arr_to_kde(FINAL_DATA, debug=True, bandwidth=2, kernel='gaussian', sample_start=0, sample_end=336, sample_num=336)
     plt.show()
 
 def get_user_id(display_name):
@@ -160,7 +165,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 2 and sys.argv[1] == "debug":
         FINAL_DATA = pickle.load(open("tmp.p", "rb"))
         # NOTE: it might be worth looking into the kernels 'epanechnikov' and 'tophat' to provide finer details about the data 
-        dbg_val = arr_to_kde(FINAL_DATA, debug=True, bandwidth=2, kernel='gaussian', sample_start=0, sample_end=368, sample_num=368)
+        dbg_val = arr_to_kde(FINAL_DATA, debug=True, bandwidth=2, kernel='gaussian', sample_start=0, sample_end=336, sample_num=336)
         pdb.set_trace()
         #plt.show()
     else:
@@ -171,5 +176,4 @@ if __name__ == "__main__":
         twitch_client = TwitchClient("gp762nuuoqcoxypju8c569th9wz7q5", "None", access_token="bgq3aphetc1h1e67jqi91jna9p1ots", refresh_token="io0mtmgwd1mb251gn96lietxx2fafqiq0hgcjlbo3thrrsva8g")
         twitch_client.login()
 
-        generate_streamer_schedule("mang0", twitch_client)
-
+        generate_streamer_schedule("xQcOW", twitch_client)
