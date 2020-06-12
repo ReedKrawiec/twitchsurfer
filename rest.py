@@ -162,6 +162,39 @@ class TwitchClient(RESTClient):
 
         return (self.access_token, self.refresh_token)
 
+class TwitchMetrics(RESTClient):
+    def __init__(self, twitch_client, cache_enabled=True):
+        super().__init__("https://www.twitchmetrics.net/c/")
+        # The cache is for making additional requests with the same streamer 
+        # name so that we don't need to make repeat requests 
+        self.cache_enabled=cache_enabled
+        self.id_cache = {} 
+        self.twitch_client = twitch_client
+
+    def get_user_id(self, display_name):
+        display_name = display_name.lower()
+        # Check to see if we've already made this request
+        if self.cache_enabled and display_name in self.id_cache:
+            return self.id_cache[display_name]
+
+        res = self.twitch_client.make_request("/helix/users?login="+display_name).json()
+        user_id = res["data"][0]["id"]
+
+        # Save the new response
+        if self.cache_enabled:
+            self.id_cache[display_name] = user_id
+        return user_id
+
+
+    def make_request(self, display_name, path):
+        streamer_id = self.get_user_id(display_name)
+        # Setup authentication headers
+        response = super().make_request(("/" + streamer_id + 
+                                        "-" + display_name.lower() + 
+                                        "/" + path), type="get")
+
+        return response
+
 # Test the authentication flow
 if __name__ == "__main__":
     twitch_client = TwitchClient("******************", "*************************",None)
