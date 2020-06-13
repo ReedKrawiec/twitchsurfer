@@ -21,9 +21,10 @@ def arr_to_kde(X, debug=False, sample_start=-4, sample_end=4, sample_num=1000, b
 
     return dens
 
-
 # Plot a 1d array
 def plot_arr(X):
     X = np.array(X)
     plt.plot(X, len(X) * [0], "x")
     plt.show()
+
+def plot_activity_chart():
