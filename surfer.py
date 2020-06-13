@@ -180,7 +180,7 @@ if __name__ == "__main__":
         test = metrics.make_request("pokimane", "/stream_history_values")
         # Start and stop times of streams
         test = metrics.make_request("pokimane", "/stream_time_values")
-        probs = generate_streamer_schedule("pokimane", twitch_client, metrics)
+        probs = generate_streamer_schedule("summit1g", twitch_client, metrics)
         draw_activity_chart(probs)
 
         pdb.set_trace()
