@@ -166,7 +166,7 @@ class TwitchMetrics(RESTClient):
     def __init__(self, twitch_client, cache_enabled=True):
         super().__init__("https://www.twitchmetrics.net/c/")
         # The cache is for making additional requests with the same streamer 
-        # name so that we don't need to make repeat requests 
+        # name so that we don't need to make repeat requests for their id
         self.cache_enabled=cache_enabled
         self.id_cache = {} 
         self.twitch_client = twitch_client

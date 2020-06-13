@@ -1,5 +1,5 @@
 from rest import TwitchClient, TwitchMetrics
-from algos import plot_arr, arr_to_kde
+from algos import plot_arr, arr_to_kde, draw_activity_chart
 import datetime
 import pytz
 import pdb
@@ -34,6 +34,7 @@ def parse_duration_delta(duration_str):
 
 # Returns a list of vods and the pagination_cursor
 # This might be really buggy. run a lot of tests
+# Deprecated for TwitchMetrics
 def get_vods(start_date, end_date, streamer, pagination_cursor=None):
     if start_date >= end_date:
         print("get_vods(): Start date cannot be greater than end_date")
@@ -180,4 +181,6 @@ if __name__ == "__main__":
         # Start and stop times of streams
         test = metrics.make_request("pokimane", "/stream_time_values")
         probs = generate_streamer_schedule("pokimane", twitch_client, metrics)
+        draw_activity_chart(probs)
+
         pdb.set_trace()

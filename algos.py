@@ -1,5 +1,6 @@
 
 from sklearn.neighbors import KernelDensity
+from PIL import Image, ImageDraw
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -27,4 +28,31 @@ def plot_arr(X):
     plt.plot(X, len(X) * [0], "x")
     plt.show()
 
-def plot_activity_chart():
+def draw_activity_chart(probs):
+    SQUARE_SIZE = 20
+    LABEL_SIZE = 40
+
+    w, h = (48 * SQUARE_SIZE), (7 * SQUARE_SIZE)
+    
+    # creating new Image object 
+    img = Image.new("RGB", (w + LABEL_SIZE, h + LABEL_SIZE)) 
+    
+    # create rectangle image 
+    img1 = ImageDraw.Draw(img)
+
+    x = 0
+    y = 0
+    for i in range(len(probs)):
+        prob = probs[i]
+        img1.rectangle([(x, y), (x + SQUARE_SIZE, y + SQUARE_SIZE)], fill =(0, int(255 * prob), 0, 128), outline ="red")
+        x += SQUARE_SIZE
+
+        if (i + 1) % 48 == 0:
+            x = 0
+            y += SQUARE_SIZE
+
+    #for y in range(0, h, SQUARE_SIZE):
+    #    for x in range(0, w, SQUARE_SIZE):
+    #        img1.rectangle([(x, y), (x + SQUARE_SIZE, y + SQUARE_SIZE)], fill ="#ffff33", outline ="red")
+    #        #img1.text((x, y), "(" + str(x) + "," + str(y) + ")", fill=(0,0,0,128))
+    img.show() 
