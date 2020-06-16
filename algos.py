@@ -45,6 +45,7 @@ def draw_activity_chart(probs):
     for i in range(len(probs)):
         prob = probs[i]
         img1.rectangle([(x, y), (x + SQUARE_SIZE, y + SQUARE_SIZE)], fill =(0, int(255 * prob), 0, 128), outline ="red")
+        img1.text((x, y), str(round(prob, 1)), fill=(255,255,255,128), spacing=1)
         x += SQUARE_SIZE
 
         if (i + 1) % 48 == 0:

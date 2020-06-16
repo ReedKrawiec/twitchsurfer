@@ -177,6 +177,7 @@ if __name__ == "__main__":
         test = metrics.make_request("pokimane", "/recent_viewership_values")
         test = metrics.make_request("pokimane", "/stream_growth_values")
 
+        # The historical data of which game the streamer was playing on stream
         test = metrics.make_request("pokimane", "/stream_history_values")
         # Start and stop times of streams
         test = metrics.make_request("pokimane", "/stream_time_values")
