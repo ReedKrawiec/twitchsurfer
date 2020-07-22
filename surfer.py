@@ -81,8 +81,10 @@ def get_vods(start_date, end_date, streamer, pagination_cursor=None):
     return (ret_vods, pagination_cursor)
 
 def generate_streamer_schedule(streamer, twitch_client, metrics):
-    stream_times = metrics.make_request(streamer, "/stream_time_values").json()
-
+    try:
+        stream_times = metrics.make_request(streamer, "/stream_time_values").json()
+    except:
+        return [0 for j in range(168 * 2)]
     # Weekly status of the stream measured at 30 minute intervals
     # 168 hrs in a week * 2 & sampling 30 minute intervals
     # element at each index represents the number of times the streamer was online at the time
@@ -128,6 +130,12 @@ def generate_streamer_schedule(streamer, twitch_client, metrics):
 
     # Calculate the total possible number of half-hour blocks that a streamer can be online for
     POSSIBLE_STATUS = [0 for j in range(168 * 2)]
+
+    #TODO: Find reason for None value
+    if FIRST == None:
+        return [0 for j in range(168 * 2)]
+    
+
     index = int((FIRST - (FIRST - datetime.timedelta(days=FIRST.weekday()))).total_seconds() / 1800)
     half_hr_blocks = int((LAST - FIRST).total_seconds() / 1800)
 
@@ -142,6 +150,8 @@ def generate_streamer_schedule(streamer, twitch_client, metrics):
     # Compute the probabilities
     PROBS = [0 for j in range(168 * 2)]
     for x in range(336):
+        if POSSIBLE_STATUS[x] <= 0:
+            return 0.0
         PROBS[x] = (STREAM_STATUS[x] / POSSIBLE_STATUS[x])
 
         # Account for the previously mentioned bug

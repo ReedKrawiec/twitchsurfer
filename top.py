@@ -2,6 +2,12 @@ from rest import TwitchClient
 import urllib.parse
 import json
 import sys
+import os
+
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+
+print(dname)
 
 def read_json(file_name):
   with open(file_name) as file_point:
