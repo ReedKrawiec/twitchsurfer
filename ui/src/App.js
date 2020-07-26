@@ -116,13 +116,24 @@ function groupStreams(streams){
     for(let a = 0; a < groups.length && !stream_sorted;a++){
       for(let b = 0;b < groups[a].length;b++){
         let saved = groups[a][b];
-        if(b != groups[a].length - 1 && !stream_to_be_sorted.end_time.isBefore(moment(groups[a][b+1].start_time))){
-          break;
+        
+        if(a == 1){
+          console.log(JSON.parse(JSON.stringify(groups[a])));
         }
-        if(stream_to_be_sorted.start_time.isAfter(moment(saved.end_time).add(1,"hour"))){
-          stream_sorted = true;
-          groups[a].push(stream_to_be_sorted);
-          break;
+
+        if(b === groups[a].length - 1){
+          if(stream_to_be_sorted.start_time.isAfter(moment(saved.end_time).add(1,"hour"))){
+            stream_sorted = true;
+            groups[a].push(stream_to_be_sorted);
+            break;
+          }
+        }
+        else{
+          if(stream_to_be_sorted.start_time.isAfter(moment(saved.end_time).add(1,"hour") && stream_to_be_sorted.end_time.isBefore(moment(groups[a][b+1].start_time)))){
+            stream_sorted = true;
+            groups[a].push(stream_to_be_sorted);
+            break;
+          }
         }
       }
     }
