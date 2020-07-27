@@ -6,6 +6,35 @@
   position: absolute;
 }
 
+.site_logo{
+  position:absolute;
+  left:0;
+  top:0;
+  font-size:1.3em;
+  margin:10px;
+  color:#8852e2;
+}
+
+.site_login{
+  position: absolute;
+  right:0;
+  top:0;
+  font-size:1.3em;
+  margin:10px;
+  color:#8852e2;
+  text-decoration: none;
+}
+
+.site_logout{
+  color:#8852e2;
+  text-decoration: none;
+}
+.site_logout:hover{
+  color:white;
+}
+
+
+
 .timeline-header-holder{
   display:flex;
   margin-left:50px;
@@ -149,6 +178,7 @@
   flex-grow:1;
   width:100%;
   background-color: #1f1c1c;
+  position: relative;
 }
 
 .timeline-body {

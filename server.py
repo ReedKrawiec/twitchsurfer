@@ -25,10 +25,10 @@ def process_streamers(y):
     is_end_time = False
     stream_times = []
     for x in range(0,336):
-        if not is_end_time and schedule[x] > 0.75:
+        if not is_end_time and schedule[x] > 0.65:
             stream_times.append(x)
             is_end_time = True
-        elif is_end_time and schedule[x] < 0.75:
+        elif is_end_time and schedule[x] < 0.65:
             stream_times.append(x)
             is_end_time = False
     return {

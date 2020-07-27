@@ -116,11 +116,6 @@ function groupStreams(streams){
     for(let a = 0; a < groups.length && !stream_sorted;a++){
       for(let b = 0;b < groups[a].length;b++){
         let saved = groups[a][b];
-        
-        if(a == 1){
-          console.log(JSON.parse(JSON.stringify(groups[a])));
-        }
-
         if(b === groups[a].length - 1){
           if(stream_to_be_sorted.start_time.isAfter(moment(saved.end_time).add(1,"hour"))){
             stream_sorted = true;
@@ -169,10 +164,17 @@ function TimelineCategory(props){
 
 function StreamerInfo(props){
   const context = useContext(UserContext);
+
+  let component = <a className="site_login" href={props.auth_string}>Login With Twitch</a>;
+  if(props.username){
+    component = <p className="site_login">{props.username} <a className="site_logout" href="./">LOGOUT</a></p>
+  }
   return(
     <div className="header-bar">
         <div className="header-container">
           <div className="info-box">
+              <p className="site_logo">TWITCH SURFER</p>
+              {component}           
             <div className="streamer-info">
               <p className="streamer-name">{context.user.name}</p>
               <div className="streamer-desc">
@@ -257,6 +259,7 @@ function twitch_get(endpoint,access_token,client_id){
 function App() {
   const [user, setUser] = useState({ name: "Asmongold", description: "Sup yall it's me it's ya boy Asmongold" });
   const [streamer_data,setStreamerData] = useState({ valid : false, data: undefined});
+  const [current_user,setCurrentUser] = useState(undefined);
   let client_id = "sh58je5z5mtatvjc7jfc1m6bgfvt94";
   let redirect_url = "http://localhost:3000";
   let response_type = "token+id_token";
@@ -274,6 +277,7 @@ function App() {
     if (window.location.hash && !streamer_data.valid) {
       let query_string = window.location.hash.slice(1);
       let raw_auth_data = query_string.split("&").map((x) => x.split("="));
+      console.log(raw_auth_data);
       let auth_data = {
         access_token: raw_auth_data[0][1],
         id_token: raw_auth_data[1][1],
@@ -283,6 +287,7 @@ function App() {
       let d = async () => {
         let x = await twitch_get("https://id.twitch.tv/oauth2/userinfo", auth_data.access_token);
         x = await x.json();
+        setCurrentUser(x.preferred_username);
         let y = await fetch(`http://127.0.0.1:5000/get_schedule?access=${auth_data.access_token}&id=${x.sub}`);
         y = await y.json();
         setStreamerData({valid:true,data: y});
@@ -296,8 +301,8 @@ function App() {
     <StreamerContext.Provider value={streamer_data}>
       <UserContext.Provider value={{ user: user, setUser: setUser }}>
         <div className="App">
-          <a href={auth_string}>test</a>
-          <StreamerInfo />
+
+          <StreamerInfo auth_string={auth_string} username={current_user}/>
           <TimeLineBody />
         </div>
       </UserContext.Provider>
