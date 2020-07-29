@@ -310,7 +310,7 @@ function App() {
       }
       d();
     }
-  })
+  },[]);
 
   return (
     //Setup the App viewport
