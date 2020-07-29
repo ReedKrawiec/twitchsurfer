@@ -21,7 +21,9 @@ print("Finished REST API setup")
 app = FlaskAPI(__name__)
 
 def process_streamers(y):
-    cutoff = 0.8
+    print(y)
+    cutoff = 0.9
+    schedule = generate_streamer_schedule(y,twitch_client,metrics)
     is_end_time = False
     stream_times = []
     if(schedule == 0.0):
@@ -58,17 +60,36 @@ def process_streamers(y):
         "schedule": stream_times
     }
 
+def get_followed(from_id,access_token):
+    counter = 0
+    total = 1
+    pagination = ""
+    data = []
+    while counter < total:
+        query_count = 100
+        query_string = ""
+        if pagination == "":
+            query_string = query_string_builder({"first":query_count,"from_id":from_id})
+        else:
+            query_string = query_string_builder({"first":query_count,"from_id":from_id,"after":pagination})
+        url = "https://api.twitch.tv/helix/users/follows" + query_string
+        headers = {
+            "Client-ID": "sh58je5z5mtatvjc7jfc1m6bgfvt94",
+            "Authorization": f"Bearer {access_token}"
+        }
+        req_data = req.get(url,headers=headers).json()
+        total = int(req_data["total"])
+        counter += len(req_data["data"])
+        pagination = req_data["pagination"]["cursor"]
+        data.extend(req_data["data"])
+    return data
+
 @app.route("/get_schedule", methods=['GET'])
 # TODO: implement some sort of caching system or something
 def get_streamer_scheudle():
-    query_string = query_string_builder({"first":100,"from_id":request.args.get("id")})
-    url = "https://api.twitch.tv/helix/users/follows" + query_string
-    headers = {
-        "Client-ID": "sh58je5z5mtatvjc7jfc1m6bgfvt94",
-        "Authorization": f"Bearer {request.args.get('access')}"
-    }
-    req_data = req.get(url,headers=headers).json()
-    streamers_list = map(lambda y: y["to_name"],req_data["data"])
+    data = get_followed(request.args.get("id"),request.args.get('access'))
+    print(len(data))
+    streamers_list = map(lambda y: y["to_name"],data)
     streamers_list = list(map(process_streamers, streamers_list))
     response = jsonify(streamers_list)
     response.headers.add('Access-Control-Allow-Origin', '*')
