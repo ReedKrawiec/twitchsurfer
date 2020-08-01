@@ -9,6 +9,7 @@ from top import query_string_builder
 import sys
 import requests as req
 import json
+import datetime
 
 print("Setting up REST API...")
 # Setup the REST API clients
@@ -20,10 +21,19 @@ print("Finished REST API setup")
 
 app = FlaskAPI(__name__)
 
+cache = {}
+
+def get_schedule_cached(y):
+    if y in cache:
+        return cache[y]
+    cache[y]["schedule"] = generate_streamer_schedule(y,twitch_client,metrics)
+    cache[y]["date"] = datetime.datetime.now()
+    return cache[y]["schedule"]
+
 def process_streamers(y):
     print(y)
-    cutoff = 0.9
-    schedule = generate_streamer_schedule(y,twitch_client,metrics)
+    cutoff = 0.75
+    schedule = get_schedule_cached(y)
     is_end_time = False
     stream_times = []
     if(schedule == 0.0):
