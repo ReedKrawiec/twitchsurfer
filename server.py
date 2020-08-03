@@ -23,6 +23,9 @@ app = FlaskAPI(__name__)
 
 cache = {}
 
+
+# A basic in memory cache for the schedules, saves after one call
+# TODO Implement saving and retrieving cache
 def get_schedule_cached(y):
     if y in cache:
         return cache[y]
@@ -32,19 +35,26 @@ def get_schedule_cached(y):
 
 def process_streamers(y):
     print(y)
+    # The percentage cutoff for when a streamer is considered live
     cutoff = 0.75
     schedule = get_schedule_cached(y)
     is_end_time = False
     stream_times = []
+    # TODO Investigate this result
+    # Workaround for schedule result
     if(schedule == 0.0):
         schedule = [0.0 for x in range(0,336)]
     always_live = True
+    # checks if the stream never falls below the streaming threshold
+    # Some streams are constantly online
     for x in range(0,336):
         if schedule[x] < cutoff:
             always_live = False;
     if always_live:
         streams_times = [0,335]
     else:
+        # Creates the alternating [start_time,stop_time,start_time,stop_time]
+        # formated list that represents a streamer's weekly streams
         for x in range(0,336):
             if not is_end_time and schedule[x] > cutoff:
                 time = x
@@ -70,6 +80,8 @@ def process_streamers(y):
         "schedule": stream_times
     }
 
+# Gets all followed streams, making multiple 
+# requests if one isn't sufficient
 def get_followed(from_id,access_token):
     counter = 0
     total = 1
@@ -98,10 +110,11 @@ def get_followed(from_id,access_token):
 # TODO: implement some sort of caching system or something
 def get_streamer_scheudle():
     data = get_followed(request.args.get("id"),request.args.get('access'))
-    print(len(data))
+    # Parses the streamers list from the data glob we get
     streamers_list = map(lambda y: y["to_name"],data)
-    streamers_list = list(map(process_streamers, streamers_list))
-    response = jsonify(streamers_list)
+    # Now process the streamers to get their formatted schedules
+    processed_streamers = list(map(process_streamers, streamers_list))
+    response = jsonify(processed_streamers)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response, status.HTTP_200_OK
 
