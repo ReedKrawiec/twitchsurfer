@@ -313,6 +313,23 @@ function twitch_get(endpoint,access_token,client_id){
   return fetch(endpoint,{ headers:headers });
 }
 
+class If extends React.Component{
+  render(){
+    let {condition} = this.props;
+    if(condition){
+      return this.props.children;
+    }
+    return (<div></div>);
+  }
+}
+
+function Loader (){
+  return(<div className="loader">
+    <p>TWITCH SURFER</p>
+    <p>LOADING</p>
+  </div>)
+}
+
 function App() {
   const [user, setUser] = useState({ name: "Asmongold", description: "Sup yall it's me it's ya boy Asmongold" });
   const [streamer_data,setStreamerData] = useState({ valid : false, data: undefined});
@@ -349,20 +366,30 @@ function App() {
         setStreamerData({valid:true,data: y});
       }
       d();
+      
+    }
+    else{
+      setStreamerData({valid:true,data: []}); 
     }
   },[]);
 
   return (
     //Setup the App viewport
-    <StreamerContext.Provider value={streamer_data}>
-      <UserContext.Provider value={{ user: user, setUser: setUser }}>
-        <div className="App">
-
-          <StreamerInfo auth_string={auth_string} username={current_user}/>
-          <TimeLineBody />
-        </div>
-      </UserContext.Provider>
-    </StreamerContext.Provider>
+    <div className="loader_holder">
+      <If condition={streamer_data.valid}>
+        <StreamerContext.Provider value={streamer_data}>
+          <UserContext.Provider value={{ user: user, setUser: setUser }}>
+            <div className="App">
+              <StreamerInfo auth_string={auth_string} username={current_user} />
+              <TimeLineBody />
+            </div>
+          </UserContext.Provider>
+        </StreamerContext.Provider>
+      </If>
+      <If condition={!streamer_data.valid}>
+        <Loader/>
+      </If>
+    </div>
   )
 }
 

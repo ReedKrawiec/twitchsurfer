@@ -28,7 +28,8 @@ cache = {}
 # TODO Implement saving and retrieving cache
 def get_schedule_cached(y):
     if y in cache:
-        return cache[y]
+        return cache[y]["schedule"]
+    cache[y] = {}
     cache[y]["schedule"] = generate_streamer_schedule(y,twitch_client,metrics)
     cache[y]["date"] = datetime.datetime.now()
     return cache[y]["schedule"]
