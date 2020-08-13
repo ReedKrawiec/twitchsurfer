@@ -16,7 +16,7 @@ def read_json(file_name):
 
 def write_json(file_name,data):
   with open(file_name, 'w') as file_p:
-    json.dump(data, file_p)
+    json.dump(data, file_p,default=str)
 
 #Cache user ids and game ids to improve speed / reduce requests
 try:

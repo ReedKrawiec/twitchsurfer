@@ -5,11 +5,14 @@ from flask import jsonify
 from rest import TwitchClient, TwitchMetrics
 # Generates an 'online' probability histogram at 30 minute intervals starting from Monday 
 from surfer import generate_streamer_schedule
-from top import query_string_builder
+from top import query_string_builder, read_json, write_json
 import sys
 import requests as req
 import json
 import datetime
+import atexit
+from os import path
+
 
 print("Setting up REST API...")
 # Setup the REST API clients
@@ -22,10 +25,15 @@ print("Finished REST API setup")
 app = FlaskAPI(__name__)
 
 cache = {}
+if path.exists("schedule_cache.json"):
+    print("Reading cache")
+    cache = read_json("schedule_cache.json")
 
-
+def save_cache():
+    print("Saving cache")
+    write_json("schedule_cache.json",cache)
 # A basic in memory cache for the schedules, saves after one call
-# TODO Implement saving and retrieving cache
+# TODO Refresh an entry if it's too old
 def get_schedule_cached(y):
     if y in cache:
         return cache[y]["schedule"]
@@ -121,3 +129,6 @@ def get_streamer_scheudle():
 
 if __name__ == "__main__":
     app.run(debug=(len(sys.argv) == 2 and sys.argv[1] == "debug"))
+
+
+atexit.register(save_cache)
