@@ -115,14 +115,55 @@ def get_followed(from_id,access_token):
         data.extend(req_data["data"])
     return data
 
+def get_metadata(streamers,access):
+    counter = 0
+    total = len(streamers)
+    data = []
+    while counter < total:
+        query_count = 30
+        if counter + 30 > total:
+            query_count = total - counter
+        headers = {
+            "Client-ID": "sh58je5z5mtatvjc7jfc1m6bgfvt94",
+            "Authorization": f"Bearer {access}"
+        }
+        st = streamers[(counter):(counter + query_count)]
+        query_string = query_string_builder({"login":st})
+        url = "https://api.twitch.tv/helix/users" + query_string
+        req_data = req.get(url,headers=headers).json()
+        print(req_data)
+        counter += len(req_data["data"])
+        data.extend(req_data["data"])
+    return data    
+
+@app.route("/get_default",  methods=["GET"])
+def get_default():
+    streamers_list = ["xqcOW","trihex","MOONMOON","summit1g","shroud",
+    "mang0","Tfue","Myth","TimTheTatman","DrLupo","NICKMERCS","loltyler1",
+    "LIRIK","sodapoppin","Hiko","Mizkif"]
+    processed_streamers = list(map(process_streamers, streamers_list))
+    desc_data = get_metadata(streamers_list,"ffmpdvhstg2yex6hbkmjkraaumyake")
+    for index in range(0,len(desc_data)):
+        processed_streamers[index]["profile"] = desc_data[index]["profile_image_url"]
+        processed_streamers[index]["description"] = desc_data[index]["description"]
+    response = jsonify(processed_streamers)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response, status.HTTP_200_OK
+
 @app.route("/get_schedule", methods=['GET'])
 # TODO: implement some sort of caching system or something
 def get_streamer_scheudle():
     data = get_followed(request.args.get("id"),request.args.get('access'))
     # Parses the streamers list from the data glob we get
-    streamers_list = map(lambda y: y["to_name"],data)
+    streamers_list = list(map(lambda y: y["to_name"],data))
     # Now process the streamers to get their formatted schedules
     processed_streamers = list(map(process_streamers, streamers_list))
+    processed_streamers = list(filter(lambda x: len(x["schedule"]) > 0,processed_streamers))
+    streamers_to_fetch_metadata = list(map(lambda y: y["streamer"],processed_streamers))
+    desc_data = get_metadata(streamers_to_fetch_metadata,"ffmpdvhstg2yex6hbkmjkraaumyake")
+    for index in range(0,len(desc_data)):
+        processed_streamers[index]["profile"] = desc_data[index]["profile_image_url"]
+        processed_streamers[index]["description"] = desc_data[index]["description"]
     response = jsonify(processed_streamers)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response, status.HTTP_200_OK

@@ -230,6 +230,12 @@ let TimeLineBody = (props) => {
     //Every two times = one whole stream
     //We alternate this variable to track whether the next time will be a start or end
     streamers.data.forEach((x) => {
+      let profile = "https://static-cdn.jtvnw.net/jtv_user_pictures/xqcow-profile_image-9298dca608632101-300x300.jpeg";
+      let desc = "Overwatch Professional tank player and full time streamer. EZ Clap";
+      if(x.description && x.profile){
+        profile = x.profile;
+        desc = x.description;
+      }
       let current_start = undefined;
       for (let a = 0; a < x.schedule.length; a++) {
         //If the time is an end time, create a stream object representing it
@@ -241,8 +247,8 @@ let TimeLineBody = (props) => {
         if (looking_for_end) {
           streams.push({
             name: x.streamer,
-            profile_picture: "https://static-cdn.jtvnw.net/jtv_user_pictures/xqcow-profile_image-9298dca608632101-300x300.jpeg",
-            description: "Overwatch Professional tank player and full time streamer. EZ Clap",
+            profile_picture: profile,
+            description: desc,
             start_time: current_start,
             end_time: moment(start_of_week).add(x.schedule[a] * 30, "minutes")
           })
@@ -252,8 +258,8 @@ let TimeLineBody = (props) => {
           if(moment(current_start).day() < 4){
             streams.push({
               name: x.streamer,
-              profile_picture: "https://static-cdn.jtvnw.net/jtv_user_pictures/xqcow-profile_image-9298dca608632101-300x300.jpeg",
-              description: "Overwatch Professional tank player and full time streamer. EZ Clap",
+              profile_picture: profile,
+              description: desc,
               start_time: moment(current_start).add(1, "week"),
               end_time: moment(start_of_week).add(x.schedule[a] * 30, "minutes").add(1,"week")
             })
@@ -269,16 +275,16 @@ let TimeLineBody = (props) => {
       if(looking_for_end){
         streams.push({
           name: x.streamer,
-          profile_picture: "https://static-cdn.jtvnw.net/jtv_user_pictures/xqcow-profile_image-9298dca608632101-300x300.jpeg",
-          description: "Overwatch Professional tank player and full time streamer. EZ Clap",
+          profile_picture: profile,
+          description: desc,
           start_time: moment(start_of_week).add(x.schedule[x.schedule.length - 1] * 30, "minutes"),
           end_time: moment(start_of_week).add(336 * 30, "minutes")
         })
         if(moment(current_start).day() < 4){
           streams.push({
             name: x.streamer,
-            profile_picture: "https://static-cdn.jtvnw.net/jtv_user_pictures/xqcow-profile_image-9298dca608632101-300x300.jpeg",
-            description: "Overwatch Professional tank player and full time streamer. EZ Clap",
+            profile_picture: profile,
+            description: desc,
             start_time: moment(start_of_week).add(x.schedule[x.schedule.length - 1] * 30, "minutes").add(1,"week"),
             end_time: moment(start_of_week).add(336 * 30, "minutes").add(1,"week")
           })
@@ -331,7 +337,7 @@ function Loader (){
 }
 
 function App() {
-  const [user, setUser] = useState({ name: "Asmongold", description: "Sup yall it's me it's ya boy Asmongold" });
+  const [user, setUser] = useState({ name: "", description: "Select a stream!" });
   const [streamer_data,setStreamerData] = useState({ valid : false, data: undefined});
   const [current_user,setCurrentUser] = useState(undefined);
   let client_id = "sh58je5z5mtatvjc7jfc1m6bgfvt94";
@@ -363,13 +369,20 @@ function App() {
         setCurrentUser(x.preferred_username);
         let y = await fetch(`http://127.0.0.1:5000/get_schedule?access=${auth_data.access_token}&id=${x.sub}`);
         y = await y.json();
+        let num_of_streamers = y.length;
+        console.log(y);
         setStreamerData({valid:true,data: y});
       }
       d();
       
     }
     else{
-      setStreamerData({valid:true,data: []}); 
+      let d = async () => {
+        let y = await fetch(`http://127.0.0.1:5000/get_default`);
+        y = await y.json();
+        setStreamerData({valid:true,data: y});
+      }
+      d();
     }
   },[]);
 
