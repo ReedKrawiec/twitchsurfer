@@ -112,7 +112,9 @@ def get_followed(from_id,access_token):
         print(req_data)
         total = int(req_data["total"])
         counter += len(req_data["data"])
-        pagination = req_data["pagination"]["cursor"]
+        pagination = ""
+        if("cursor" in req_data["pagination"]):
+            pagination = req_data["pagination"]["cursor"]
         data.extend(req_data["data"])
     return data
 
