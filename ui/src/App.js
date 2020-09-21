@@ -114,29 +114,32 @@ function TimelineHeader(props){
 }
 
 
+
 //Render the lines that represent streams in the timeline body
 function TimelineStreamLineRender(props){
   const context = useContext(UserContext);
 
   let start = moment(props.start);  
   let streams_arr = [];
+  let index = 0;
   for(let stream of props.streams){
     let start_x = moment.duration(stream.start_time.diff(start)).asMinutes()/60 * HOUR_PX;
     let duration = moment.duration(stream.end_time.diff(stream.start_time)).asMinutes()/60 * HOUR_PX;
     //These are pixel values that represent the left position of the element, and the
     //duration, which would be the length
     streams_arr.push(
-      <div className="time-stream-container" style={{left:start_x}}>
-      <img className="time-stream-picture" src={stream.profile_picture} />
-      <svg style={{fill:props.color}} className="timeline-stream" height="50" width={duration+25} onClick={()=>{context.setUser({name:stream.name,description:stream.description})}}>
-        <g>
-          <circle cx="15" cy="25" r="15"></circle>
-          <rect x="15" y="17.5" width={duration} height="15" />
-          <text x="50%" y="20%" dominant-baseline="middle" text-anchor="middle">{stream.name}</text> 
-          <circle cx={duration+10} cy="25" r="15"></circle>
-        </g>
-      </svg>
+      <div key={index} className="time-stream-container" style={{left:start_x}}>
+        <img className="time-stream-picture" src={stream.profile_picture} />
+        <svg style={{fill:props.color}} className="timeline-stream" height="50" width={duration+25} onClick={()=>{context.setUser({name:stream.name,description:stream.description})}}>
+          <g>
+            <circle cx="15" cy="25" r="15"></circle>
+            <rect x="15" y="17.5" width={duration} height="15" />
+            <text x="50%" y="20%" dominant-baseline="middle" text-anchor="middle">{stream.name}</text> 
+            <circle cx={duration+10} cy="25" r="15"></circle>
+          </g>
+        </svg>
       </div>);
+      index++;
   }
   return (
     <div className="timeline-render-line">
@@ -152,7 +155,7 @@ function TimelineStreamLineRender(props){
 function TimelineStreamRender(props) {
   let groups = [];
   for (let a = 0; a < props.grouped_streams.length;a++){
-    groups.push(<TimelineStreamLineRender start={props.start} color={props.color} streams={props.grouped_streams[a]}/>)
+    groups.push(<TimelineStreamLineRender start={props.start} key={a} color={props.color} streams={props.grouped_streams[a]}/>)
   }
   return(<div>
     {groups}
@@ -231,10 +234,12 @@ let TimeLineBody = (props) => {
     //We alternate this variable to track whether the next time will be a start or end
     streamers.data.forEach((x) => {
       let profile = "https://static-cdn.jtvnw.net/jtv_user_pictures/xqcow-profile_image-9298dca608632101-300x300.jpeg";
-      let desc = "Overwatch Professional tank player and full time streamer. EZ Clap";
-      if(x.description && x.profile){
-        profile = x.profile;
+      let desc = "No description given.";
+      if(x.description){
         desc = x.description;
+      }
+      if(x.profile){
+        profile = x.profile;
       }
       let current_start = undefined;
       for (let a = 0; a < x.schedule.length; a++) {

@@ -131,7 +131,6 @@ def get_metadata(streamers,access):
         query_string = query_string_builder({"login":st})
         url = "https://api.twitch.tv/helix/users" + query_string
         req_data = req.get(url,headers=headers).json()
-        print(req_data)
         counter += len(req_data["data"])
         data.extend(req_data["data"])
     return data    
@@ -169,7 +168,7 @@ def get_streamer_scheudle():
     return response, status.HTTP_200_OK
 
 if __name__ == "__main__":
-    app.run(debug=(len(sys.argv) == 2 and sys.argv[1] == "debug"))
+    app.run(threaded=True,debug=(len(sys.argv) == 2 and sys.argv[1] == "debug"))
 
 
 atexit.register(save_cache)
