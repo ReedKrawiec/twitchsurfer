@@ -346,7 +346,8 @@ function App() {
   const [streamer_data,setStreamerData] = useState({ valid : false, data: undefined});
   const [current_user,setCurrentUser] = useState(undefined);
   let client_id = "sh58je5z5mtatvjc7jfc1m6bgfvt94";
-  let redirect_url = "http://localhost:3000";
+  let redirect_url = "https://reedkrawiec.github.io/twitchsurfer";
+  let api_url = "https://twitchsurfer.herokuapp.com"
   let response_type = "token+id_token";
   let scopes = "openid+user:edit:follows+user:read:email";
   let claims = JSON.stringify({
@@ -372,7 +373,7 @@ function App() {
         let x = await twitch_get("https://id.twitch.tv/oauth2/userinfo", auth_data.access_token);
         x = await x.json();
         setCurrentUser(x.preferred_username);
-        let y = await fetch(`http://127.0.0.1:5000/get_schedule?access=${auth_data.access_token}&id=${x.sub}`);
+        let y = await fetch(`${api_url}/get_schedule?access=${auth_data.access_token}&id=${x.sub}`);
         y = await y.json();
         let num_of_streamers = y.length;
         console.log(y);
@@ -383,7 +384,7 @@ function App() {
     }
     else{
       let d = async () => {
-        let y = await fetch(`http://127.0.0.1:5000/get_default`);
+        let y = await fetch(`${api_url}/get_default`);
         y = await y.json();
         setStreamerData({valid:true,data: y});
       }
