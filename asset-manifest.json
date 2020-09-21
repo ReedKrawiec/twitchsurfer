@@ -1,0 +1,27 @@
+{
+  "files": {
+    "main.css": "/twitchsurfer/static/css/main.796b3d78.chunk.css",
+    "main.js": "/twitchsurfer/static/js/main.c28c0fd9.chunk.js",
+    "main.js.map": "/twitchsurfer/static/js/main.c28c0fd9.chunk.js.map",
+    "runtime-main.js": "/twitchsurfer/static/js/runtime-main.560c5695.js",
+    "runtime-main.js.map": "/twitchsurfer/static/js/runtime-main.560c5695.js.map",
+    "static/css/2.a0babc62.chunk.css": "/twitchsurfer/static/css/2.a0babc62.chunk.css",
+    "static/js/2.1f94daa8.chunk.js": "/twitchsurfer/static/js/2.1f94daa8.chunk.js",
+    "static/js/2.1f94daa8.chunk.js.map": "/twitchsurfer/static/js/2.1f94daa8.chunk.js.map",
+    "index.html": "/twitchsurfer/index.html",
+    "precache-manifest.f70f5654aaeabe84b839855c3c1f963c.js": "/twitchsurfer/precache-manifest.f70f5654aaeabe84b839855c3c1f963c.js",
+    "service-worker.js": "/twitchsurfer/service-worker.js",
+    "static/css/2.a0babc62.chunk.css.map": "/twitchsurfer/static/css/2.a0babc62.chunk.css.map",
+    "static/css/main.796b3d78.chunk.css.map": "/twitchsurfer/static/css/main.796b3d78.chunk.css.map",
+    "static/js/2.1f94daa8.chunk.js.LICENSE.txt": "/twitchsurfer/static/js/2.1f94daa8.chunk.js.LICENSE.txt",
+    "static/media/index.css": "/twitchsurfer/static/media/Roboto-Regular.11eabca2.ttf",
+    "static/media/logo.svg": "/twitchsurfer/static/media/logo.ee7cd8ed.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.560c5695.js",
+    "static/css/2.a0babc62.chunk.css",
+    "static/js/2.1f94daa8.chunk.js",
+    "static/css/main.796b3d78.chunk.css",
+    "static/js/main.c28c0fd9.chunk.js"
+  ]
+}
