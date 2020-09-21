@@ -109,6 +109,7 @@ def get_followed(from_id,access_token):
             "Authorization": f"Bearer {access_token}"
         }
         req_data = req.get(url,headers=headers).json()
+        print(req_data)
         total = int(req_data["total"])
         counter += len(req_data["data"])
         pagination = req_data["pagination"]["cursor"]
