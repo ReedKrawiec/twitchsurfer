@@ -20,9 +20,29 @@ twitch_client = TwitchClient("gp762nuuoqcoxypju8c569th9wz7q5", "None", access_to
 twitch_client.login()
 metrics = TwitchMetrics(twitch_client)
 
+metadata_access = ""
+
 print("Finished REST API setup")
 
 app = FlaskAPI(__name__)
+
+def get_meta_data_token():
+    global metadata_access
+    url = "https://id.twitch.tv/oauth2/validate"
+    headers = {
+        "Authorization": f"Bearer {metadata_access}"
+    }
+    req_data = req.get(url,headers=headers).json()
+    if 'status' in req_data and req_data['status'] == 401:
+        query_string = query_string_builder({
+            "client_id": "sh58je5z5mtatvjc7jfc1m6bgfvt94",
+            "client_secret": "ukot3oxumjyj1zxbs5rvuwdqoimdm6",
+            "grant_type":"client_credentials"
+        })
+        url = "https://id.twitch.tv/oauth2/token" + query_string
+        req_data = req.post(url).json()
+        metadata_access = req_data['access_token']
+    return metadata_access
 
 cache = {}
 if path.exists("schedule_cache.json"):
@@ -134,6 +154,7 @@ def get_metadata(streamers,access):
         query_string = query_string_builder({"login":st})
         url = "https://api.twitch.tv/helix/users" + query_string
         req_data = req.get(url,headers=headers).json()
+        print(req_data)
         counter += len(req_data["data"])
         data.extend(req_data["data"])
     return data    
@@ -144,7 +165,7 @@ def get_default():
     "mang0","Tfue","Myth","TimTheTatman","DrLupo","NICKMERCS","loltyler1",
     "LIRIK","sodapoppin","Hiko","Mizkif"]
     processed_streamers = list(map(process_streamers, streamers_list))
-    desc_data = get_metadata(streamers_list,"ffmpdvhstg2yex6hbkmjkraaumyake")
+    desc_data = get_metadata(streamers_list,get_meta_data_token())
     for index in range(0,len(desc_data)):
         processed_streamers[index]["profile"] = desc_data[index]["profile_image_url"]
         processed_streamers[index]["description"] = desc_data[index]["description"]
@@ -162,7 +183,7 @@ def get_streamer_scheudle():
     processed_streamers = list(map(process_streamers, streamers_list))
     processed_streamers = list(filter(lambda x: len(x["schedule"]) > 0,processed_streamers))
     streamers_to_fetch_metadata = list(map(lambda y: y["streamer"],processed_streamers))
-    desc_data = get_metadata(streamers_to_fetch_metadata,"ffmpdvhstg2yex6hbkmjkraaumyake")
+    desc_data = get_metadata(streamers_to_fetch_metadata,get_meta_data_token())
     for index in range(0,len(desc_data)):
         processed_streamers[index]["profile"] = desc_data[index]["profile_image_url"]
         processed_streamers[index]["description"] = desc_data[index]["description"]
