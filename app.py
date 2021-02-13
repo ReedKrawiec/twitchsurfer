@@ -154,21 +154,21 @@ def get_metadata(streamers,access):
         query_string = query_string_builder({"login":st})
         url = "https://api.twitch.tv/helix/users" + query_string
         req_data = req.get(url,headers=headers).json()
-        print(req_data)
         counter += len(req_data["data"])
         data.extend(req_data["data"])
     return data    
 
 @app.route("/get_default",  methods=["GET"])
 def get_default():
-    streamers_list = ["xqcOW","trihex","MOONMOON","summit1g","shroud",
-    "mang0","Tfue","Myth","TimTheTatman","DrLupo","NICKMERCS","loltyler1",
-    "LIRIK","sodapoppin","Hiko","Mizkif"]
+    streamers_list = ["xqcow","trihex","moonmoon","summit1g","shroud",
+    "mang0","tfue","myth","timthetatman","drlupo","nickmercs","loltyler1",
+    "lirik","sodapoppin","hiko","mizkif"]
     processed_streamers = list(map(process_streamers, streamers_list))
     desc_data = get_metadata(streamers_list,get_meta_data_token())
-    for index in range(0,len(desc_data)):
-        processed_streamers[index]["profile"] = desc_data[index]["profile_image_url"]
-        processed_streamers[index]["description"] = desc_data[index]["description"]
+    for data in desc_data:
+        index = streamers_list.index(data["login"])
+        processed_streamers[index]["profile"] = data["profile_image_url"]
+        processed_streamers[index]["description"] = data["description"]
     response = jsonify(processed_streamers)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response, status.HTTP_200_OK
@@ -184,9 +184,10 @@ def get_streamer_scheudle():
     processed_streamers = list(filter(lambda x: len(x["schedule"]) > 0,processed_streamers))
     streamers_to_fetch_metadata = list(map(lambda y: y["streamer"],processed_streamers))
     desc_data = get_metadata(streamers_to_fetch_metadata,get_meta_data_token())
-    for index in range(0,len(desc_data)):
-        processed_streamers[index]["profile"] = desc_data[index]["profile_image_url"]
-        processed_streamers[index]["description"] = desc_data[index]["description"]
+    for data in desc_data:
+        index = streamers_list.index(data["login"])
+        processed_streamers[index]["profile"] = data["profile_image_url"]
+        processed_streamers[index]["description"] = data["description"]
     response = jsonify(processed_streamers)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response, status.HTTP_200_OK

@@ -376,7 +376,6 @@ function App() {
         let y = await fetch(`${api_url}/get_schedule?access=${auth_data.access_token}&id=${x.sub}`);
         y = await y.json();
         let num_of_streamers = y.length;
-        console.log(y);
         setStreamerData({valid:true,data: y});
       }
       d();
